@@ -536,15 +536,34 @@
   }
   .burst-item.burst-word {
     font-family: "Quicksand", "Be Vietnam Pro", sans-serif;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
-    color: #fff;
-    background: #1f6fe5;
-    border: 2px solid #0d2a5c;
+    letter-spacing: 0.04em;
     border-radius: 999px;
-    padding: 3px 10px;
-    box-shadow: 2px 2px 0 #0d2a5c;
+    padding: 4px 11px;
     white-space: nowrap;
+    border: 2px solid currentColor;
+  }
+  /* CR7: xanh dương, viền xanh đậm */
+  .burst-word.w-cr7 {
+    color: #0d2a5c;
+    background: linear-gradient(135deg, #5aa2ff, #1f6fe5);
+    -webkit-text-fill-color: #fff;
+    box-shadow: 2px 2px 0 #0d2a5c;
+  }
+  /* BIGBANG: nền đen bóng, chữ vàng ánh kim như lightstick vương miện */
+  .burst-word.w-bb {
+    color: #f7c600;
+    background: linear-gradient(160deg, #2b2b2b 0%, #050505 60%, #1a1a1a 100%);
+    box-shadow: 0 0 0 1px #000, 0 0 12px rgba(247, 198, 0, 0.75), 2px 2px 0 #000;
+    text-shadow: 0 0 6px rgba(255, 214, 10, 0.9);
+    font-style: italic;
+  }
+  /* VIP: vàng rực, chữ đen */
+  .burst-word.w-vip {
+    color: #111;
+    background: linear-gradient(135deg, #fff27a, #ffcc00);
+    box-shadow: 2px 2px 0 #111, 0 0 10px rgba(255, 204, 0, 0.6);
   }
   @keyframes burstFly {
     0% { opacity: 1; transform: translate(0, 0) scale(0.4) rotate(0deg); }
@@ -1218,21 +1237,39 @@ Cậu nhớ giữ gìn sức khỏe đấy, cậu dùng phá lắm!
   /* ==========================================================================
      HIỆU ỨNG BẮN PHÁO HOA / THẢ TIM TƯƠNG TÁC
      ========================================================================== */
-  // Bộ icon riêng khi bấm vào ảnh: CR7 ⚽, sách 📚, tim xanh 💙…
-  const BURST_ICONS = ["💙", "⚽", "📚", "💙", "🐐", "📖", "💙", "🏆", "🇵🇹", "📘", "💙", "🫶"];
-  const BURST_WORDS = ["SIUUU!", "CR7", "7"];
+  // Bộ icon riêng khi bấm vào ảnh: tim (xanh dương/xanh lá/hồng), CR7, sách, BIGBANG
+  const BURST_SETS = [
+    { w: 40, icons: ["💙", "💚", "🩷"] },
+    { w: 18, icons: ["⚽", "🐐", "🏆", "🇵🇹"] },
+    { w: 14, icons: ["📚", "📖", "📘"] },
+    { w: 16, icons: ["👑", "🎤", "💥", "⭐"] }
+  ];
+  const BURST_STICKERS = [
+    { cls: "w-cr7", txt: "CR7" },
+    { cls: "w-cr7", txt: "SIUUU!" },
+    { cls: "w-bb",  txt: "👑 BIGBANG" },
+    { cls: "w-bb",  txt: "BANG BANG BANG" },
+    { cls: "w-vip", txt: "VIP 💛" }
+  ];
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  function pickIcon(){
+    let r = Math.random() * BURST_SETS.reduce((t, x) => t + x.w, 0);
+    for (const set of BURST_SETS) { if ((r -= set.w) < 0) return pick(set.icons); }
+    return "💙";
+  }
 
   function burstConfetti(x, y){
     const N = 18;
     for (let i = 0; i < N; i++) {
       const el = document.createElement("div");
-      // Thỉnh thoảng bắn ra chữ "SIUUU!" / "CR7" dạng nhãn dán xanh
+      // Xen kẽ vài nhãn dán chữ (CR7 / BIGBANG / VIP)
       if (i % 6 === 2) {
-        el.className = "burst-item burst-word";
-        el.textContent = BURST_WORDS[Math.floor(Math.random() * BURST_WORDS.length)];
+        const st = pick(BURST_STICKERS);
+        el.className = "burst-item burst-word " + st.cls;
+        el.textContent = st.txt;
       } else {
         el.className = "burst-item";
-        el.textContent = BURST_ICONS[Math.floor(Math.random() * BURST_ICONS.length)];
+        el.textContent = pickIcon();
       }
       const angle = (Math.PI * 2 * i) / N + (Math.random() * 0.4 - 0.2);
       const dist = 60 + Math.random() * 110;
