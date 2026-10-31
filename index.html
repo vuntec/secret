@@ -534,6 +534,18 @@
     font-size: 24px;
     animation: burstFly 1.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
+  .burst-item.burst-word {
+    font-family: "Quicksand", "Be Vietnam Pro", sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    background: #1f6fe5;
+    border: 2px solid #0d2a5c;
+    border-radius: 999px;
+    padding: 3px 10px;
+    box-shadow: 2px 2px 0 #0d2a5c;
+    white-space: nowrap;
+  }
   @keyframes burstFly {
     0% { opacity: 1; transform: translate(0, 0) scale(0.4) rotate(0deg); }
     80% { opacity: 1; }
@@ -1206,13 +1218,23 @@ Cậu nhớ giữ gìn sức khỏe đấy, cậu dùng phá lắm!
   /* ==========================================================================
      HIỆU ỨNG BẮN PHÁO HOA / THẢ TIM TƯƠNG TÁC
      ========================================================================== */
-  function burstConfetti(x, y, customEmoji){
-    const emojis = [customEmoji || "💖", "✨", "🎉", "🌸", "🫶", "⭐", "🍀"];
-    for (let i = 0; i < 16; i++) {
+  // Bộ icon riêng khi bấm vào ảnh: CR7 ⚽, sách 📚, tim xanh 💙…
+  const BURST_ICONS = ["💙", "⚽", "📚", "💙", "🐐", "📖", "💙", "🏆", "🇵🇹", "📘", "💙", "🫶"];
+  const BURST_WORDS = ["SIUUU!", "CR7", "7"];
+
+  function burstConfetti(x, y){
+    const N = 18;
+    for (let i = 0; i < N; i++) {
       const el = document.createElement("div");
-      el.className = "burst-item";
-      el.textContent = emojis[i % emojis.length];
-      const angle = (Math.PI * 2 * i) / 16 + (Math.random() * 0.4 - 0.2);
+      // Thỉnh thoảng bắn ra chữ "SIUUU!" / "CR7" dạng nhãn dán xanh
+      if (i % 6 === 2) {
+        el.className = "burst-item burst-word";
+        el.textContent = BURST_WORDS[Math.floor(Math.random() * BURST_WORDS.length)];
+      } else {
+        el.className = "burst-item";
+        el.textContent = BURST_ICONS[Math.floor(Math.random() * BURST_ICONS.length)];
+      }
+      const angle = (Math.PI * 2 * i) / N + (Math.random() * 0.4 - 0.2);
       const dist = 60 + Math.random() * 110;
       el.style.left = x + "px";
       el.style.top = y + "px";
@@ -1220,7 +1242,7 @@ Cậu nhớ giữ gìn sức khỏe đấy, cậu dùng phá lắm!
       el.style.setProperty("--by", (Math.sin(angle) * dist - 30) + "px");
       el.style.setProperty("--br", (Math.random() * 90 - 45) + "deg");
       document.body.appendChild(el);
-      setTimeout(() => el.remove(), 1200);
+      setTimeout(() => el.remove(), 1300);
     }
   }
 
