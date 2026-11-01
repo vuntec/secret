@@ -1372,7 +1372,11 @@ Cậu nhớ giữ gìn sức khỏe đấy, cậu dùng phá lắm!
         hInp.value = ""; hInp.focus();
       }
     };
-    inp.oninput = () => { if (inp.value.length >= 4 && !btn.disabled) form.requestSubmit(); };
+    inp.oninput = () => {
+      // đang nhập lại mật khẩu: nút về chỗ cũ, hiện lại chữ ban đầu
+      if (runaway && !btn.disabled) { btn.style.setProperty("--run", "none"); btn.textContent = "Mở thiệp 💌"; }
+      if (inp.value.length >= 4 && !btn.disabled) form.requestSubmit();
+    };
     form.onsubmit = async (e) => {
       e.preventDefault();
       const pw = inp.value.trim();
@@ -1387,7 +1391,7 @@ Cậu nhớ giữ gìn sức khỏe đấy, cậu dùng phá lắm!
         if (wrong >= 7) runaway = true;
         card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
         inp.value = ""; inp.focus();
-        btn.disabled = false; btn.textContent = runaway ? "Bắt được tớ hong? 😜" : "Mở thiệp 💌";
+        btn.disabled = false; btn.textContent = "Mở thiệp 💌";
         if (runaway) { btn.classList.add("runaway"); btn.style.setProperty("--run", "none"); }
       }
     };
