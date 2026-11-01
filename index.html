@@ -538,9 +538,6 @@
   .lock-card .lock-ic { cursor: default; font-size: 32px; }
   .lock-card h1 { margin-bottom: 8px !important; }
   .lock-sub { margin: 0 0 18px; color: var(--muted); font-size: 14.5px; }
-  .lock-tip { margin-top: 6px; background: none; border: 0; color: var(--muted); font: inherit; font-size: 13.5px; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
-  .lock-tip.on { text-decoration: none; color: var(--accent); font-weight: 600; cursor: default; }
-  .lock-input.nudge { animation: lockShake .35s ease; }
   .lock-form { display: flex; flex-direction: column; gap: 10px; }
   .lock-input {
     font: inherit; font-size: 22px; letter-spacing: 0.4em; text-align: center;
@@ -549,6 +546,7 @@
     outline: none; width: 100%;
   }
   .lock-input:focus { box-shadow: 0 0 0 4px var(--accent-soft); }
+  .lock-input::placeholder { letter-spacing: normal; font-size: 15px; }
   .lock-btn {
     font: inherit; font-weight: 700; font-size: 15.5px; cursor: pointer;
     padding: 12px 16px; border-radius: 14px;
@@ -1287,27 +1285,15 @@ Cậu nhớ giữ gìn sức khỏe đấy, cậu dùng phá lắm!
       <h1>Thiệp bí mật</h1>
       <p class="lock-sub">${box.hint ? "" : "Nhập mật khẩu để mở thiệp nha 💌"}</p>
       <form class="lock-form" autocomplete="off">
-        <input class="lock-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="• • • •" aria-label="Mật khẩu" autofocus>
+        <input class="lock-input" type="password" placeholder="Mật khẩu…" aria-label="Mật khẩu" autofocus>
         <button class="lock-btn" type="submit">Mở thiệp 💌</button>
       </form>
-      <p class="lock-err" aria-live="polite"></p>
-      <button type="button" class="lock-tip">💡 Gợi ý</button>`;
+      <p class="lock-err" aria-live="polite"></p>`;
     if (box.hint) card.querySelector(".lock-sub").textContent = box.hint;
     v.appendChild(makeFloatingParticles("friend", "💙"));
     v.appendChild(card);
     const form = card.querySelector("form"), inp = card.querySelector("input"),
           btn = card.querySelector("button"), err = card.querySelector(".lock-err");
-    const tip = card.querySelector(".lock-tip");
-    tip.onclick = () => { tip.textContent = "Mật khẩu chỉ gồm số thôi 🔢"; tip.classList.add("on"); inp.focus(); };
-    inp.oninput = () => {
-      const raw = inp.value;
-      inp.value = raw.replace(/\D/g, "").slice(0, 4);
-      if (/\D/.test(raw)) {
-        err.textContent = "Chỉ nhập số thôi nha 🔢";
-        inp.classList.remove("nudge"); void inp.offsetWidth; inp.classList.add("nudge");
-        return;
-      }
-      err.textContent = ""; if (inp.value.length === 4) form.requestSubmit(); };
     form.onsubmit = async (e) => {
       e.preventDefault();
       const pw = inp.value.trim();
