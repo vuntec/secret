@@ -555,6 +555,7 @@
   }
   .lock-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--card-border); }
   .lock-btn:disabled { opacity: .7; cursor: wait; }
+  .lock-btn.fleeing { align-self: center; width: auto; padding: 9px 16px; font-size: 14px; white-space: nowrap; }
   .lock-btn.runaway, .lock-btn.runaway:active {
     position: relative; z-index: 20; transform: var(--run, none);
     transition: transform .28s cubic-bezier(.34,1.56,.64,1);
@@ -1374,7 +1375,7 @@ Cậu nhớ giữ gìn sức khỏe đấy, cậu dùng phá lắm!
     };
     inp.oninput = () => {
       // đang nhập lại mật khẩu: nút về chỗ cũ, hiện lại chữ ban đầu
-      if (runaway && !btn.disabled) { btn.style.setProperty("--run", "none"); btn.textContent = "Mở thiệp 💌"; }
+      if (runaway && !btn.disabled) { btn.style.setProperty("--run", "none"); btn.classList.remove("fleeing"); btn.textContent = "Mở thiệp 💌"; }
       if (inp.value.length >= 4 && !btn.disabled) form.requestSubmit();
     };
     form.onsubmit = async (e) => {
@@ -1392,7 +1393,7 @@ Cậu nhớ giữ gìn sức khỏe đấy, cậu dùng phá lắm!
         card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
         inp.value = ""; inp.focus();
         btn.disabled = false; btn.textContent = "Mở thiệp 💌";
-        if (runaway) { btn.classList.add("runaway"); btn.style.setProperty("--run", "none"); }
+        if (runaway) { btn.classList.add("runaway"); btn.classList.remove("fleeing"); btn.style.setProperty("--run", "none"); }
       }
     };
     // Sau 7 lần sai: nút "Mở thiệp" chạy trốn, không bấm được (gõ đủ 4 ký tự đúng vẫn tự mở)
@@ -1402,6 +1403,8 @@ Cậu nhớ giữ gìn sức khỏe đấy, cậu dùng phá lắm!
       if (!runaway) return;
       if (e.cancelable) e.preventDefault();
       e.stopPropagation();
+      btn.textContent = TEASE[Math.floor(Math.random() * TEASE.length)];
+      btn.classList.add("fleeing"); // đang chạy: thu gọn vừa chữ
       // vị trí gốc của nút (không tính transform) để tính chỗ nhảy tới
       const pr = (btn.offsetParent || document.body).getBoundingClientRect();
       const r = { left: pr.left + btn.offsetLeft, top: pr.top + btn.offsetTop, width: btn.offsetWidth, height: btn.offsetHeight };
@@ -1412,7 +1415,6 @@ Cậu nhớ giữ gìn sức khỏe đấy, cậu dùng phá lắm!
         y = pad + Math.random() * Math.max(1, H - r.height - pad * 2);
       } while (++tries < 12 && Math.hypot(x - r.left, y - r.top) < 120);
       btn.style.setProperty("--run", `translate(${Math.round(x - r.left)}px, ${Math.round(y - r.top)}px) rotate(${Math.round(Math.random() * 16 - 8)}deg)`);
-      btn.textContent = TEASE[Math.floor(Math.random() * TEASE.length)];
     };
     btn.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") dodge(e); });
     btn.addEventListener("pointerdown", dodge);
