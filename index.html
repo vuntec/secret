@@ -556,7 +556,43 @@
   .lock-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--card-border); }
   .lock-btn:disabled { opacity: .7; cursor: wait; }
   .lock-err { min-height: 1.4em; margin: 10px 0 0; color: var(--accent); font-weight: 600; font-size: 13.5px; }
-  .card.shake { animation: lockShake .4s ease; }
+  .card.shake, .help-q.shake { animation: lockShake .4s ease; }
+  .lock-help { margin-top: 12px; }
+  .help-pop {
+    font: inherit; font-weight: 700; font-size: 14.5px; cursor: pointer;
+    padding: 10px 16px; border-radius: 999px; border: 2px solid var(--card-border);
+    background: #ffe3ef; color: #c2185b; box-shadow: 3px 3px 0 var(--card-border);
+    animation: helpPop .6s cubic-bezier(.34,1.56,.64,1) both, helpWiggle 2.4s ease-in-out .8s infinite;
+  }
+  .help-pop:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--card-border); }
+  .help-box {
+    margin-top: 4px; padding: 14px; border-radius: 16px; border: 2px dashed #f48fb1;
+    background: #fff5f9; animation: helpPop .5s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  .help-ask { margin: 0 0 10px; font-size: 14px; color: var(--muted); }
+  .help-ask b { display: block; margin-top: 4px; font-size: 16px; color: var(--ink); }
+  .help-form { display: flex; gap: 8px; }
+  .help-input {
+    flex: 1; min-width: 0; font: inherit; font-size: 15px; padding: 9px 12px; border-radius: 12px;
+    border: 2px solid var(--card-border); background: #fff; color: var(--ink); outline: none;
+  }
+  .help-input:focus { box-shadow: 0 0 0 4px var(--accent-soft); }
+  .help-form .lock-btn { padding: 9px 14px; font-size: 14px; }
+  .help-msg { min-height: 1.3em; margin: 8px 0 0; font-size: 13.5px; font-weight: 600; color: #c2185b; }
+  .help-hint p { margin: 0 0 8px; font-size: 14.5px; line-height: 1.5; opacity: 0; animation: helpLine .5s ease forwards; }
+  .help-hint p:nth-child(2) { animation-delay: .9s; }
+  .help-hint p:nth-child(3) { animation-delay: 1.8s; }
+  .help-hint .digits { display: flex; justify-content: center; gap: 8px; margin: 4px 0 10px; opacity: 0; animation: helpLine .5s ease 1.8s forwards; }
+  .help-hint .digits span {
+    width: 34px; height: 40px; display: grid; place-items: center; border-radius: 10px;
+    border: 2px solid var(--card-border); background: #fff; font-weight: 800; font-size: 18px;
+  }
+  .help-hint .digits .dsw { background: #ffe3ef; animation: helpSwap 1.6s ease-in-out 2.4s infinite; }
+  .help-hint .digits .dsw + .dsw { animation-direction: reverse; }
+  @keyframes helpPop { 0% { opacity: 0; transform: scale(.4) translateY(10px); } 100% { opacity: 1; transform: none; } }
+  @keyframes helpWiggle { 0%,86%,100% { transform: rotate(0); } 90% { transform: rotate(-4deg) scale(1.04); } 95% { transform: rotate(4deg) scale(1.04); } }
+  @keyframes helpLine { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes helpSwap { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px) rotate(-6deg); } }
   @keyframes lockShake {
     0%,100% { transform: translateX(0); } 20% { transform: translateX(-8px); }
     40% { transform: translateX(8px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); }
@@ -1288,12 +1324,49 @@ Cậu nhớ giữ gìn sức khỏe đấy, cậu dùng phá lắm!
         <input class="lock-input" type="password" maxlength="4" placeholder="Mật khẩu…" aria-label="Mật khẩu" autofocus>
         <button class="lock-btn" type="submit">Mở thiệp 💌</button>
       </form>
-      <p class="lock-err" aria-live="polite"></p>`;
+      <p class="lock-err" aria-live="polite"></p>
+      <div class="lock-help" hidden>
+        <button type="button" class="help-pop">🥺 Cậu cần tớ giúp gì không?</button>
+        <div class="help-box help-q" hidden>
+          <p class="help-ask">Trả lời đúng câu này tớ mới giúp nha 😌<b>Màu cậu yêu thích là gì?</b></p>
+          <form class="help-form" autocomplete="off">
+            <input class="help-input" placeholder="Màu…" aria-label="Màu yêu thích">
+            <button class="lock-btn" type="submit">Trả lời</button>
+          </form>
+          <p class="help-msg" aria-live="polite"></p>
+        </div>
+        <div class="help-box help-hint" hidden>
+          <p>🎂 Là cái ngày mà cậu được thêm một tuổi đó…</p>
+          <p>…nhưng tớ đã lén <b>xáo nó một chút</b> rồi 🙈</p>
+        </div>
+      </div>`;
     if (box.hint) card.querySelector(".lock-sub").textContent = box.hint;
     v.appendChild(makeFloatingParticles("friend", "💙"));
     v.appendChild(card);
     const form = card.querySelector("form"), inp = card.querySelector("input"),
           btn = card.querySelector("button"), err = card.querySelector(".lock-err");
+    // Sau 7 lần sai: hiện nút "Cậu cần tớ giúp gì không?" → hỏi màu yêu thích → đúng (hồng) thì hiện gợi ý
+    let wrong = 0;
+    const help = card.querySelector(".lock-help"), pop = help.querySelector(".help-pop"),
+          q = help.querySelector(".help-q"), hint = help.querySelector(".help-hint"),
+          hForm = help.querySelector(".help-form"), hInp = help.querySelector(".help-input"),
+          hMsg = help.querySelector(".help-msg");
+    const sparkle = (el) => { try { const r = el.getBoundingClientRect(); burstConfetti(r.left + r.width / 2, r.top + r.height / 2); } catch(_) {} };
+    const openHelpButton = () => { help.hidden = false; setTimeout(() => sparkle(pop), 250); };
+    pop.onclick = () => { pop.hidden = true; q.hidden = false; hInp.focus(); };
+    const norm = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/gi, "d").toLowerCase().replace(/\s+/g, "");
+    hForm.onsubmit = (e) => {
+      e.preventDefault();
+      const a = norm(hInp.value);
+      if (!a) return;
+      if (a.includes("hong") || a.includes("pink")) {
+        q.hidden = true; hint.hidden = false; sparkle(hint); inp.focus();
+      } else {
+        hMsg.textContent = "Sr… chắc đáp án tớ sai rồi, xin lỗi c, đoán lại nha T-T";
+        q.classList.remove("shake"); void q.offsetWidth; q.classList.add("shake");
+        hInp.value = ""; hInp.focus();
+      }
+    };
     inp.oninput = () => { if (inp.value.length >= 4 && !btn.disabled) form.requestSubmit(); };
     form.onsubmit = async (e) => {
       e.preventDefault();
@@ -1305,6 +1378,7 @@ Cậu nhớ giữ gìn sức khỏe đấy, cậu dùng phá lắm!
         showViewer(d);
       } catch(ex) {
         err.textContent = "Tớ tin cậu sẽ làm được 🍀";
+        if (++wrong === 7) openHelpButton();
         card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
         inp.value = ""; inp.focus();
         btn.disabled = false; btn.textContent = "Mở thiệp 💌";
