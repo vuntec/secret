@@ -1302,9 +1302,9 @@ Cậu nhớ giữ gìn sức khỏe đấy, cậu dùng phá lắm!
         const d = await decryptCard(box, pw);
         showViewer(d);
       } catch(ex) {
-        err.textContent = "Sai mật khẩu rồi, thử lại nha 🥺";
+        err.textContent = "Tớ tin cậu sẽ làm được 🍀";
         card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
-        inp.select();
+        inp.value = ""; inp.focus();
         btn.disabled = false; btn.textContent = "Mở thiệp 💌";
       }
     };
