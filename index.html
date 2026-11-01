@@ -1294,6 +1294,7 @@ Cậu nhớ giữ gìn sức khỏe đấy, cậu dùng phá lắm!
     v.appendChild(card);
     const form = card.querySelector("form"), inp = card.querySelector("input"),
           btn = card.querySelector("button"), err = card.querySelector(".lock-err");
+    inp.oninput = () => { if (inp.value.length >= 4 && !btn.disabled) form.requestSubmit(); };
     form.onsubmit = async (e) => {
       e.preventDefault();
       const pw = inp.value.trim();
