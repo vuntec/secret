@@ -555,6 +555,11 @@
   }
   .lock-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--card-border); }
   .lock-btn:disabled { opacity: .7; cursor: wait; }
+  .lock-btn.runaway, .lock-btn.runaway:active {
+    position: relative; z-index: 20; transform: var(--run, none);
+    transition: transform .28s cubic-bezier(.34,1.56,.64,1);
+    box-shadow: 3px 3px 0 var(--card-border);
+  }
   .lock-err { min-height: 1.4em; margin: 10px 0 0; color: var(--accent); font-weight: 600; font-size: 13.5px; }
   .card.shake, .help-q.shake { animation: lockShake .4s ease; }
   .lock-help { margin-top: 12px; }
@@ -1379,11 +1384,36 @@ Cậu nhớ giữ gìn sức khỏe đấy, cậu dùng phá lắm!
       } catch(ex) {
         err.textContent = "Tớ tin cậu sẽ làm được 🍀";
         if (++wrong === 7) openHelpButton();
+        if (wrong >= 7) runaway = true;
         card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
         inp.value = ""; inp.focus();
-        btn.disabled = false; btn.textContent = "Mở thiệp 💌";
+        btn.disabled = false; btn.textContent = runaway ? "Bắt được tớ hong? 😜" : "Mở thiệp 💌";
+        if (runaway) { btn.classList.add("runaway"); btn.style.setProperty("--run", "none"); }
       }
     };
+    // Sau 7 lần sai: nút "Mở thiệp" chạy trốn, không bấm được (gõ đủ 4 ký tự đúng vẫn tự mở)
+    let runaway = false;
+    const TEASE = ["Hụt rồi nha 🤭", "Ở đây nè 👀", "Hong bắt được đâu 😝", "Nhanh lên nữa đi 🏃‍♀️", "Gần được rồi đó 😆", "Bắt được tớ hong? 😜"];
+    const dodge = (e) => {
+      if (!runaway) return;
+      if (e.cancelable) e.preventDefault();
+      e.stopPropagation();
+      // vị trí gốc của nút (không tính transform) để tính chỗ nhảy tới
+      const pr = (btn.offsetParent || document.body).getBoundingClientRect();
+      const r = { left: pr.left + btn.offsetLeft, top: pr.top + btn.offsetTop, width: btn.offsetWidth, height: btn.offsetHeight };
+      const pad = 12, W = innerWidth, H = innerHeight;
+      let x, y, tries = 0;
+      do {
+        x = pad + Math.random() * Math.max(1, W - r.width - pad * 2);
+        y = pad + Math.random() * Math.max(1, H - r.height - pad * 2);
+      } while (++tries < 12 && Math.hypot(x - r.left, y - r.top) < 120);
+      btn.style.setProperty("--run", `translate(${Math.round(x - r.left)}px, ${Math.round(y - r.top)}px) rotate(${Math.round(Math.random() * 16 - 8)}deg)`);
+      btn.textContent = TEASE[Math.floor(Math.random() * TEASE.length)];
+    };
+    btn.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") dodge(e); });
+    btn.addEventListener("pointerdown", dodge);
+    btn.addEventListener("touchstart", dodge, { passive: false });
+    btn.addEventListener("click", (e) => { if (runaway && e.detail > 0) { e.preventDefault(); dodge(e); } });
     setTimeout(() => inp.focus(), 300);
   }
   const pipe = async (bytes, stream) =>
