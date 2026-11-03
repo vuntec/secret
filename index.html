@@ -552,6 +552,13 @@
     outline: none; width: 100%;
   }
   .lock-input:focus { box-shadow: 0 0 0 4px var(--accent-soft); }
+  .pw-dots { display: flex; justify-content: center; gap: 12px; margin: 2px 0 4px; }
+  .pw-dots i {
+    width: 12px; height: 12px; border-radius: 50%;
+    border: 2px solid var(--accent); background: transparent;
+    transition: background .15s ease, transform .2s cubic-bezier(.34,1.56,.64,1);
+  }
+  .pw-dots i.on { background: var(--accent); transform: scale(1.2); }
   .lock-input::placeholder { letter-spacing: normal; font-size: 15px; }
   .lock-btn {
     font: inherit; font-weight: 700; font-size: 15.5px; cursor: pointer;
@@ -1333,7 +1340,8 @@ Cậu nhớ giữ gìn sức khỏe đấy, cậu dùng phá lắm!
       <h1>Thiệp bí mật</h1>
       <p class="lock-sub">${box.hint ? "" : "Nhập mật khẩu để mở thiệp nha 💌"}</p>
       <form class="lock-form" autocomplete="off">
-        <input class="lock-input" type="password" maxlength="4" placeholder="Mật khẩu…" aria-label="Mật khẩu" autofocus>
+        <input class="lock-input" type="password" maxlength="4" placeholder="Mật khẩu…" aria-label="Mật khẩu (4 ký tự)" autofocus>
+        <div class="pw-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
         <button class="lock-btn" type="submit">Mở thiệp 💌</button>
       </form>
       <p class="lock-err" aria-live="polite"></p>
@@ -1379,7 +1387,10 @@ Cậu nhớ giữ gìn sức khỏe đấy, cậu dùng phá lắm!
         hInp.value = ""; hInp.focus();
       }
     };
+    const dots = card.querySelectorAll(".pw-dots i");
+    const paintDots = () => dots.forEach((d, k) => d.classList.toggle("on", k < inp.value.length));
     inp.oninput = () => {
+      paintDots();
       // đang nhập lại mật khẩu: nút về chỗ cũ, hiện lại chữ ban đầu
       if (runaway && !btn.disabled) { btn.style.setProperty("--run", "none"); btn.classList.remove("fleeing"); btn.textContent = "Mở thiệp 💌"; }
       if (inp.value.length >= 4 && !btn.disabled) form.requestSubmit();
@@ -1397,7 +1408,7 @@ Cậu nhớ giữ gìn sức khỏe đấy, cậu dùng phá lắm!
         if (++wrong === 7) openHelpButton();
         if (wrong >= 7) runaway = true;
         card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
-        inp.value = ""; inp.focus();
+        inp.value = ""; paintDots(); inp.focus();
         btn.disabled = false; btn.textContent = "Mở thiệp 💌";
         if (runaway) { btn.classList.add("runaway"); btn.classList.remove("fleeing"); btn.style.setProperty("--run", "none"); }
       }
